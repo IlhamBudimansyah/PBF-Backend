@@ -6,33 +6,33 @@ use CodeIgniter\Model;
 
 class MataKuliahModel extends Model
 {
-    protected $table            = 'Matakuliah';
+    protected $table            = 'mata_kuliah';
     protected $primaryKey       = 'id_matkul';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['nama_matkul', 'sks', 'semester'];
-
+    protected $allowedFields    = ['id_matkul', 'nama_matkul', 'sks', 'semester', 'id_dosen'];
+    
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
-
+    
     protected array $casts = [];
     protected array $castHandlers = [];
-
+    
     // Dates
     protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
-
+    
     // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
-
+    
     // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = [];
@@ -43,4 +43,10 @@ class MataKuliahModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+    
+    public function getByDosen($id_dosen)
+    {
+        return $this->db->table('mata_kuliah')->where('id_dosen', $id_dosen)->get()->getResultArray();
+    }
+    
 }

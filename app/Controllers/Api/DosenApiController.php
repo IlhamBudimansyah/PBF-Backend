@@ -35,7 +35,7 @@ class DosenApiController extends BaseController
         $data = $this->m_dosen->find($id_dosen);
         
         if ($data) {
-            return $this->respond($data);
+            return $this->respond($data, 200);
         } else {
             return $this->failNotFound("Data dosen dengan ID $id_dosen tidak ditemukan.");
         }
@@ -46,6 +46,12 @@ class DosenApiController extends BaseController
         // fungsi untuk menyimpan data ke tabel dosen
         try {
             $rules = [
+                'id_dosen' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'id dosen harus di isi!'
+                    ]
+                ],
                 'nama_dosen' => [
                     'rules' => 'required',
                     'errors' => [
@@ -64,8 +70,14 @@ class DosenApiController extends BaseController
                     'errors' => [
                         'required' => 'no telp harus di isi!'
                     ]
+                ],
+                'password' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Password harus diisi!'
                 ]
-            ];
+            ]
+        ];
             
             if (!$this->validate($rules)) {
                 return $this->fail($this->validator->getErrors());
@@ -75,7 +87,8 @@ class DosenApiController extends BaseController
                 "id_dosen" => $this->request->getPost("id_dosen"),
                 "nama_dosen" => $this->request->getPost("nama_dosen"),
                 "email" => $this->request->getPost("email"),
-                "no_telp" => $this->request->getPost("no_telp")
+                "no_telp" => $this->request->getPost("no_telp"),
+                "password" => $this->request->getPost("password")
             ];
             $this->m_dosen->insert($data);
     
@@ -114,8 +127,14 @@ class DosenApiController extends BaseController
                     'errors' => [
                         'required' => 'No telepon harus diisi!'
                     ]
+                ],
+                'password' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Password harus diisi!'
                 ]
-            ];
+            ]
+        ];
 
             if (!$this->validate($rules)) {
                 return $this->fail($this->validator->getErrors());
@@ -124,7 +143,8 @@ class DosenApiController extends BaseController
             $data = [
                 'nama_dosen' => $this->request->getRawInput()['nama_dosen'] ?? null,
                 'email' => $this->request->getRawInput()['email'] ?? null,
-                'no_telp' => $this->request->getRawInput()['no_telp'] ?? null
+                'no_telp' => $this->request->getRawInput()['no_telp'] ?? null,
+                'password' => $this->request->getRawInput()['password'] ?? null
             ];
 
             if ($this->m_dosen->update($id_dosen, $data)) {
@@ -148,4 +168,25 @@ class DosenApiController extends BaseController
             return $this->failNotFound("Data dosen dengan ID $id_dosen tidak ditemukan.");
         }
     }
+
+    public function login(){
+        $email = $this->request->getPost('email');
+        $password = $this->request->getPost('password');
+
+        $dosen = $this->m_dosen->where('email', $email)
+                            ->where('password', $password)
+                            ->first();
+        
+        if($dosen){
+            return $this->respond([
+                'status' => 200,
+                'message' => 'Login Berhasil',
+                'role' => 'dosen',
+                'data' => $dosen
+            ]);
+        }
+
+        return $this->fail('Email atau password salah', 401);
+
+    }   
 }
