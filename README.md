@@ -25,7 +25,7 @@ http://localhost/phpmyadmin
 ## 2. Clone Repository
 Clone repository ini ke dalam direktori lokal :
 ```php
-git clone https://github.com/ghinasafina/PBF-Backend.git
+git clone https://github.com/IlhamBudimansyah/PBF-Backend.git
 ```
 
 ## 3. Install Composer
