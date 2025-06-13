@@ -29,19 +29,13 @@ git clone https://github.com/IlhamBudimansyah/PBF-Backend.git
 cd PBF-Backend
 ```
 
-## 3. Konfigurasi Environment
-Salin file .env.example menjadi .env dan atur konfigurasi database:
-```php
-cp env .env
-```
-
-## 4. Install Composer
+## 3. Install Composer
 Pastikan kamu sudah memiliki Composer yang terinstal. Lalu jalankan command berikut melalui terminal VS Code untuk menambahkan composer ke dalam code :
 ```php
 composer install
 ```
 
-## 5. Konfigurasi Environment
+## 4. Konfigurasi Environment
 Edit file .env dan sesuaikan dengan koneksi database lokal kamu:
 ```php
 database.default.hostname = localhost
@@ -59,20 +53,20 @@ CI_ENVIRONMENT = development
 ```
 Agar bisa menampilkan error ketika kita salah/typo saat mengerjakan projectnya
 
-## 6. Membuat Database dan Import Database
+## 5. Membuat Database dan Import Database
 Download Databasenya melalui link dibawah ini :
 ```php
 https://drive.google.com/file/d/1EjKNxOrKj8vFCkhieK7waPv574I3Szem/view?usp=sharing
 ```
 
-## 7. Menjalankan Server Development
+## 6. Menjalankan Server Development
 Jalankan server CodeIgniter dengan command:
 ```php
 php spark serve
 ```
 Server akan berjalan di http://localhost:8080
 
-## 8. Cek Endpoint API Menggunakan Postman
+## 7. Cek Endpoint API Menggunakan Postman
 Gunakan Postman untuk mengetes endpoint berikut:
 
 Dosen \
