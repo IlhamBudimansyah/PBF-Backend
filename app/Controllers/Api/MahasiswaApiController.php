@@ -13,10 +13,14 @@ class MahasiswaApiController extends BaseController
 
     public function __construct()
     {
+        // Inisialisasi model Mahasiswa
         $this->m_mahasiswa = new MahasiswaModel();
     }
 
-    // Get all mahasiswa
+    /**
+     * GET /mahasiswa
+     * Menampilkan seluruh data mahasiswa
+     */
     public function index()
     {
         $res = [
@@ -27,7 +31,10 @@ class MahasiswaApiController extends BaseController
         return $this->respond($res);
     }
 
-    // Get mahasiswa by NPM
+    /**
+     * GET /mahasiswa/{NPM}
+     * Menampilkan data mahasiswa berdasarkan NPM
+     */
     public function show($NPM)
     {
         $data = $this->m_mahasiswa->find($NPM);
@@ -39,6 +46,10 @@ class MahasiswaApiController extends BaseController
         }
     }
 
+    /**
+     * POST /mahasiswa
+     * Menambahkan data mahasiswa baru
+     */
     public function create()
     {
         $data = [
@@ -49,20 +60,25 @@ class MahasiswaApiController extends BaseController
             'tahun_akademik' => $this->request->getPost('tahun_akademik'),
             'id_prodi' => $this->request->getPost('id_prodi')
         ];
-        $this->m_mahasiswa->insert($data); // Simpan data ke database
+
+        // Simpan data ke database
+        $this->m_mahasiswa->insert($data);
+
         $res = [
             "status" => 200,
             "message" => "Berhasil membuat data!",
             "data" => $data
         ];
         return $this->respond($res);
-
     }
 
-    // Update mahasiswa by NPM
+    /**
+     * PUT /mahasiswa/{NPM}
+     * Mengupdate data mahasiswa berdasarkan NPM
+     */
     public function update($NPM)
     {
-        $data = $this->request->getRawInput();
+        $data = $this->request->getRawInput(); // Ambil data dari PUT/RAW JSON
 
         if ($this->m_mahasiswa->update($NPM, $data)) {
             return $this->respond(['message' => 'Mahasiswa berhasil diupdate.']);
@@ -71,14 +87,20 @@ class MahasiswaApiController extends BaseController
         }
     }
 
-    // Delete mahasiswa by NPM
+    /**
+     * DELETE /mahasiswa/{NPM}
+     * Menghapus data mahasiswa berdasarkan NPM
+     */
     public function delete($NPM)
     {
         $data = $this->m_mahasiswa->find($NPM);
 
         if ($data) {
             $this->m_mahasiswa->delete($NPM);
-            return $this->respondDeleted(['status' =>    203, 'message' => 'Mahasiswa berhasil dihapus.']);
+            return $this->respondDeleted([
+                'status' => 203,
+                'message' => 'Mahasiswa berhasil dihapus.'
+            ]);
         } else {
             return $this->failNotFound("Data mahasiswa dengan NPM $NPM tidak ditemukan.");
         }

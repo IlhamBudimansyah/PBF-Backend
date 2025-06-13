@@ -1,37 +1,42 @@
 <?php
 
-namespace App\Controllers\Api;
+namespace App\Controllers\Api; // Namespace API agar rapi dan terstruktur
 
-use App\Controllers\BaseController;
-use App\Models\DosenModel;
-use CodeIgniter\API\ResponseTrait;
-use CodeIgniter\HTTP\ResponseInterface;
+use App\Controllers\BaseController; // Menggunakan BaseController bawaan CI
+use App\Models\DosenModel; // Memanggil model untuk tabel dosen
+use CodeIgniter\API\ResponseTrait; // Trait untuk mempermudah response API
 
 class DosenApiController extends BaseController
 {
     use ResponseTrait;
-    protected $m_dosen;
+    protected $m_dosen; // Properti untuk menyimpan instance model
 
     public function __construct()
     {
+        // Inisialisasi model saat controller dibuat
         $this->m_dosen = new DosenModel();
     }
 
+    /**
+     * GET /dosen
+     * Menampilkan semua data dosen
+     */
     public function index()
     {
-        //
         $res = [
             "status" => 200,
             "message" => "Data berhasil dimuat!",
             "data" => $this->m_dosen->orderBy("id_dosen", "ASC")->findAll()
         ];
-
         return $this->respond($res);
     }
 
+    /**
+     * GET /dosen/{id}
+     * Menampilkan data dosen berdasarkan ID
+     */
     public function show($id_dosen)
     {
-        //
         $data = $this->m_dosen->find($id_dosen);
         
         if ($data) {
@@ -40,23 +45,23 @@ class DosenApiController extends BaseController
             return $this->failNotFound("Data dosen dengan ID $id_dosen tidak ditemukan.");
         }
     }
-    
+
+    /**
+     * POST /dosen
+     * Menambahkan data dosen baru
+     */
     public function create()
     {
-        // fungsi untuk menyimpan data ke tabel dosen
         try {
+            // Validasi input
             $rules = [
                 'id_dosen' => [
                     'rules' => 'required',
-                    'errors' => [
-                        'required' => 'id dosen harus di isi!'
-                    ]
+                    'errors' => ['required' => 'id dosen harus di isi!']
                 ],
                 'nama_dosen' => [
                     'rules' => 'required',
-                    'errors' => [
-                        'required' => 'nama dosen harus di isi!'
-                    ]
+                    'errors' => ['required' => 'nama dosen harus di isi!']
                 ],
                 'email' => [
                     'rules' => 'required|valid_email',
@@ -67,22 +72,20 @@ class DosenApiController extends BaseController
                 ],
                 'no_telp' => [
                     'rules' => 'required',
-                    'errors' => [
-                        'required' => 'no telp harus di isi!'
-                    ]
+                    'errors' => ['required' => 'no telp harus di isi!']
                 ],
                 'password' => [
                     'rules' => 'required',
-                    'errors' => [
-                        'required' => 'Password harus diisi!'
+                    'errors' => ['required' => 'Password harus diisi!']
                 ]
-            ]
-        ];
-            
+            ];
+
+            // Jika validasi gagal
             if (!$this->validate($rules)) {
                 return $this->fail($this->validator->getErrors());
             }
-    
+
+            // Data yang akan disimpan
             $data = [
                 "id_dosen" => $this->request->getPost("id_dosen"),
                 "nama_dosen" => $this->request->getPost("nama_dosen"),
@@ -90,8 +93,11 @@ class DosenApiController extends BaseController
                 "no_telp" => $this->request->getPost("no_telp"),
                 "password" => $this->request->getPost("password")
             ];
+
+            // Simpan ke database
             $this->m_dosen->insert($data);
-    
+
+            // Berhasil
             $res = [
                 "status" => 201,
                 "message" => "Data dosen berhasil dibuat!",
@@ -102,18 +108,20 @@ class DosenApiController extends BaseController
         } catch (\Exception $e) {
             return $this->failServerError($e->getMessage());
         }
-    }    
+    }
 
-    // Update dosen by id_dosen
+    /**
+     * PUT /dosen/{id}
+     * Mengupdate data dosen berdasarkan ID
+     */
     public function update($id_dosen)
     {
         try {
+            // Validasi input
             $rules = [
                 'nama_dosen' => [
                     'rules' => 'required',
-                    'errors' => [
-                        'required' => 'Nama dosen harus diisi!'
-                    ]
+                    'errors' => ['required' => 'Nama dosen harus diisi!']
                 ],
                 'email' => [
                     'rules' => 'required|valid_email',
@@ -124,22 +132,20 @@ class DosenApiController extends BaseController
                 ],
                 'no_telp' => [
                     'rules' => 'required',
-                    'errors' => [
-                        'required' => 'No telepon harus diisi!'
-                    ]
+                    'errors' => ['required' => 'No telepon harus diisi!']
                 ],
                 'password' => [
                     'rules' => 'required',
-                    'errors' => [
-                        'required' => 'Password harus diisi!'
+                    'errors' => ['required' => 'Password harus diisi!']
                 ]
-            ]
-        ];
+            ];
 
+            // Jika validasi gagal
             if (!$this->validate($rules)) {
                 return $this->fail($this->validator->getErrors());
             }
 
+            // Ambil data input mentah dari PUT request
             $data = [
                 'nama_dosen' => $this->request->getRawInput()['nama_dosen'] ?? null,
                 'email' => $this->request->getRawInput()['email'] ?? null,
@@ -147,6 +153,7 @@ class DosenApiController extends BaseController
                 'password' => $this->request->getRawInput()['password'] ?? null
             ];
 
+            // Update data di database
             if ($this->m_dosen->update($id_dosen, $data)) {
                 return $this->respond(['message' => 'Data dosen berhasil diupdate.']);
             } else {
@@ -157,6 +164,10 @@ class DosenApiController extends BaseController
         }
     }
 
+    /**
+     * DELETE /dosen/{id}
+     * Menghapus data dosen berdasarkan ID
+     */
     public function delete($id_dosen)
     {
         $data = $this->m_dosen->find($id_dosen);
@@ -169,15 +180,21 @@ class DosenApiController extends BaseController
         }
     }
 
-    public function login(){
+    /**
+     * POST /dosen/login
+     * Fitur login dosen menggunakan email & password
+     */
+    public function login()
+    {
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
 
+        // Cari dosen berdasarkan email dan password
         $dosen = $this->m_dosen->where('email', $email)
                             ->where('password', $password)
                             ->first();
         
-        if($dosen){
+        if ($dosen) {
             return $this->respond([
                 'status' => 200,
                 'message' => 'Login Berhasil',
@@ -187,6 +204,5 @@ class DosenApiController extends BaseController
         }
 
         return $this->fail('Email atau password salah', 401);
-
-    }   
+    }
 }

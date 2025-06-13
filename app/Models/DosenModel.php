@@ -6,12 +6,18 @@ use CodeIgniter\Model;
 
 class DosenModel extends Model
 {
+    // Nama tabel dalam database yang digunakan oleh model ini
     protected $table            = 'dosen';
+
+    // Nama kolom yang menjadi primary key di tabel 'dosen'
     protected $primaryKey       = 'id_dosen';
+    
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
+    
+    // Daftar kolom yang boleh diisi atau diubah melalui method Create dan Update
     protected $allowedFields    = ['id_dosen', 'nama_dosen', 'email', 'no_telp', 'password'];
 
     protected bool $allowEmptyInserts = false;
