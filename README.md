@@ -1,68 +1,311 @@
-# CodeIgniter 4 Application Starter
+# PBF BACKEND
 
-## What is CodeIgniter?
+## 1. Tools Yang Digunakan
+### CodeIgniter Versi 4
+Link download CodeIgniter :
+```php
+https://codeigniter.com/download
+```
+### Composer
+Link download Composer :
+```php
+https://getcomposer.org/download/
+```
+### Postman
+Link donwload Postman :
+```php
+https://www.postman.com/downloads/
+```
+### PhpMyAdmin
+Link PhpMyAdmin :
+```php
+http://localhost/phpmyadmin
+```
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## 2. Clone Repository
+Clone repository ini ke dalam direktori lokal :
+```php
+git clone https://github.com/ghinasafina/PBF-Backend.git
+```
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## 3. Install Composer
+Pastikan kamu sudah memiliki Composer yang terinstal. Lalu jalankan command berikut melalui terminal VS Code untuk menambahkan composer ke dalam code :
+```php
+composer install
+```
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## 4. Konfigurasi Environment
+Edit file .env dan sesuaikan dengan koneksi database lokal kamu:
+```php
+database.default.hostname = localhost
+database.default.database = "nama_database_anda"
+database.default.username = root
+database.default.password = 
+```
+Jangan lupa mengganti CI_Environment nya dari :
+```php
+CI_ENVIRONMENT = production
+```
+Menjadi :
+```php
+CI_ENVIRONMENT = development
+```
+Agar bisa menampilkan error ketika kita salah/typo saat mengerjakan projectnya
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+## 5. Membuat Database dan Import Database
+Download Databasenya melalui link dibawah ini :
+```php
+https://drive.google.com/file/d/1EjKNxOrKj8vFCkhieK7waPv574I3Szem/view?usp=sharing
+```
 
-## Installation & updates
+## 6. Membuat Model & Controller
+Buat Model dan Controller sesuai dengan database yang ada. Seperti Dosen, Mahasiswa, Mata Kuliah, Detail Nilai, Nilai-Nilai \
+Berikut salah satu contoh Model dan Controller-nya
+### Dosen Model
+```php
+class DosenModel extends Model
+{
+    // Nama tabel dalam database yang digunakan oleh model ini
+    protected $table            = 'dosen';
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+    // Nama kolom yang menjadi primary key di tabel 'dosen'
+    protected $primaryKey       = 'id_dosen';
+    
+    protected $useAutoIncrement = false;
+    protected $returnType       = 'array';
+    protected $useSoftDeletes   = false;
+    protected $protectFields    = true;
+    
+    // Daftar kolom yang boleh diisi atau diubah melalui method Create dan Update
+    protected $allowedFields    = ['id_dosen', 'nama_dosen', 'email', 'no_telp', 'password'];
+```
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+### Dosen Controller
+```php
+     // * GET /dosen
+     // * Menampilkan semua data dosen
 
-## Setup
+    public function index()
+    {
+        $res = [
+            "status" => 200,
+            "message" => "Data berhasil dimuat!",
+            "data" => $this->m_dosen->orderBy("id_dosen", "ASC")->findAll()
+        ];
+        return $this->respond($res);
+    }
+```
+```php
+     // * GET /dosen/$1
+     // * Menampilkan data dosen berdasarkan ID
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+    public function show($id_dosen)
+    {
+        $data = $this->m_dosen->find($id_dosen);
+        
+        if ($data) {
+            return $this->respond($data, 200);
+        } else {
+            return $this->failNotFound("Data dosen dengan ID $id_dosen tidak ditemukan.");
+        }
+    }
+```
+```php
+     // * POST /dosen
+     // * Menambahkan data dosen baru
 
-## Important Change with index.php
+    public function create()
+    {
+        try {
+            // Validasi input
+            $rules = [
+                'id_dosen' => [
+                    'rules' => 'required',
+                    'errors' => ['required' => 'id dosen harus di isi!']
+                ],
+                'nama_dosen' => [
+                    'rules' => 'required',
+                    'errors' => ['required' => 'nama dosen harus di isi!']
+                ],
+                'email' => [
+                    'rules' => 'required|valid_email',
+                    'errors' => [
+                        'required' => 'email harus di isi!',
+                        'valid_email' => 'email tidak valid'
+                    ]
+                ],
+                'no_telp' => [
+                    'rules' => 'required',
+                    'errors' => ['required' => 'no telp harus di isi!']
+                ],
+                'password' => [
+                    'rules' => 'required',
+                    'errors' => ['required' => 'Password harus diisi!']
+                ]
+            ];
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+            // Jika validasi gagal
+            if (!$this->validate($rules)) {
+                return $this->fail($this->validator->getErrors());
+            }
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+            // Data yang akan disimpan
+            $data = [
+                "id_dosen" => $this->request->getPost("id_dosen"),
+                "nama_dosen" => $this->request->getPost("nama_dosen"),
+                "email" => $this->request->getPost("email"),
+                "no_telp" => $this->request->getPost("no_telp"),
+                "password" => $this->request->getPost("password")
+            ];
 
-**Please** read the user guide for a better explanation of how CI4 works!
+            // Simpan ke database
+            $this->m_dosen->insert($data);
 
-## Repository Management
+            // Berhasil
+            $res = [
+                "status" => 201,
+                "message" => "Data dosen berhasil dibuat!",
+                "data" => $data
+            ];
+            return $this->respond($res);
+        // Untuk mencegah sistem crash akibat error tak terduga.
+        } catch (\Exception $e) {
+            return $this->failServerError($e->getMessage());
+        }
+    }
+```
+```php
+     // * PUT /dosen/$1
+     // * Mengupdate data dosen berdasarkan ID
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+    public function update($id_dosen)
+    {
+        try {
+            // Validasi input
+            $rules = [
+                'nama_dosen' => [
+                    'rules' => 'required',
+                    'errors' => ['required' => 'Nama dosen harus diisi!']
+                ],
+                'email' => [
+                    'rules' => 'required|valid_email',
+                    'errors' => [
+                        'required' => 'Email harus diisi!',
+                        'valid_email' => 'Email tidak valid'
+                    ]
+                ],
+                'no_telp' => [
+                    'rules' => 'required',
+                    'errors' => ['required' => 'No telepon harus diisi!']
+                ],
+                'password' => [
+                    'rules' => 'required',
+                    'errors' => ['required' => 'Password harus diisi!']
+                ]
+            ];
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+            // Jika validasi gagal
+            if (!$this->validate($rules)) {
+                return $this->fail($this->validator->getErrors());
+            }
 
-## Server Requirements
+            // Ambil data input mentah dari PUT request
+            $data = [
+                'nama_dosen' => $this->request->getRawInput()['nama_dosen'] ?? null,
+                'email' => $this->request->getRawInput()['email'] ?? null,
+                'no_telp' => $this->request->getRawInput()['no_telp'] ?? null,
+                'password' => $this->request->getRawInput()['password'] ?? null
+            ];
 
-PHP version 8.1 or higher is required, with the following extensions installed:
+            // Update data di database
+            if ($this->m_dosen->update($id_dosen, $data)) {
+                return $this->respond(['message' => 'Data dosen berhasil diupdate.']);
+            } else {
+                return $this->failValidationErrors($this->m_dosen->errors());
+            }
+        // Untuk mencegah sistem crash akibat error tak terduga.
+        } catch (\Exception $e) {
+            return $this->failServerError($e->getMessage());
+        }
+    }
+```
+```php
+    // * DELETE /dosen/{id}
+    // * Menghapus data dosen berdasarkan ID
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+    public function delete($id_dosen)
+    {
+        $data = $this->m_dosen->find($id_dosen);
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
+        if ($data) {
+            $this->m_dosen->delete($id_dosen);
+            return $this->respondDeleted(['status' => 203, 'message' => 'Data dosen berhasil dihapus.']);
+        } else {
+            return $this->failNotFound("Data dosen dengan ID $id_dosen tidak ditemukan.");
+        }
+    }
+```
+```php
+    // * POST /dosen/login
+    // * Fitur login dosen menggunakan email & password
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+    public function login()
+    {
+        $email = $this->request->getPost('email');
+        $password = $this->request->getPost('password');
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+        // Cari dosen berdasarkan email dan password
+        $dosen = $this->m_dosen->where('email', $email)
+                            ->where('password', $password)
+                            ->first();
+        if ($dosen) {
+            return $this->respond([
+                'status' => 200,
+                'message' => 'Login Berhasil',
+                'role' => 'dosen',
+                'data' => $dosen
+            ]);
+        }
+        return $this->fail('Email atau password salah', 401);
+    }
+```
+
+## 7. Menjalankan Server Development
+Jalankan server CodeIgniter dengan command:
+```php
+php spark serve
+```
+Server akan berjalan di http://localhost:8080
+
+## 8. Cek Endpoint API Menggunakan Postman
+Gunakan Postman untuk mengetes endpoint berikut:
+
+Dosen \
+GET → http://localhost:8080/api/dosen (Untuk menampilkan seluruh data dosen yang ada) \
+POST → http://localhost:8080/api/dosen (Untuk menambahkan data dosen) \
+PUT → http://localhost:8080/api/dosen/$1 (Untuk megedit data dosen dengan ID DOSEN yang ingin kita edit) \
+DELETE → http://localhost:8080/api/dosen/$1 (Untuk menghapus data dosen dengan ID DOSEN yang ingin kita hapus)
+
+Mahasiswa \
+GET → http://localhost:8080/api/mahasiswa (Untuk menampilkan seluruh data mahasiswa yang ada) \
+POST → http://localhost:8080/api/mahasiswa (Untuk menambahkan data mahasiswa) \
+PUT → http://localhost:8080/api/mahasiswa/$1 (Untuk megedit data mahasiswa dengan NPM yang ingin kita edit) \
+DELETE → http://localhost:8080/api/mahasiswa/$1 (Untuk menghapus data mahasiswa dengan NPM yang ingin kita hapus)
+
+Detail Nilai \
+GET → http://localhost:8080/api/nilai (Untuk menampilkan seluruh data detail nilai mahasiswa yang ada) \
+POST → http://localhost:8080/api/nilai (Untuk menambahkan data detail nilai mahasiswa) \
+PUT → http://localhost:8080/api/nilai/$1 (Untuk megedit data detail nilai mahasiswa dengan ID DETAIL yang ingin kita edit) \
+DELETE → http://localhost:8080/api/nilai/$1 (Untuk menghapus data detail nilai mahasiswa dengan ID DETAIL yang ingin kita hapus)
+
+Nilai-Nilai \
+GET → http://localhost:8080/api/nilainilai (Untuk menampilkan seluruh data nilai akhir mahasiswa yang ada) \
+POST → http://localhost:8080/api/nilainilai (Untuk menambahkan data nilai akhir mahasiswa) \
+PUT → http://localhost:8080/api/nilainilai/$1 (Untuk megedit data nilai akhir mahasiswa dengan ID NILAI yang ingin kita edit) \
+DELETE → http://localhost:8080/api/nilainilai/$1 (Untuk menghapus data nilai akhir mahasiswa dengan ID NILAI yang ingin kita hapus)
+
+Matkul \
+GET → http://localhost:8080/api/matkul (Untuk menampilkan seluruh mata kuliah yang ada) \
+POST → http://localhost:8080/api/matkul (Untuk menambahkan mata kuliah) \
+PUT → http://localhost:8080/api/matkul/$1 (Untuk megedit mata kuliah dengan ID MATKUL yang ingin kita edit) \
+DELETE → http://localhost:8080/api/matkul/$1 (Untuk menghapus mata kuliah dengan ID MATKUL yang ingin kita hapus)
